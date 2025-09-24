@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>随机名称生成器</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <script>
+        // 配置Tailwind颜色
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#07e4e4',
+                        secondary: '#c105fa',
+                        accent: '#F59E0B',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .card-animation {
+                transition: all 0.3s ease;
+            }
+            .btn-pulse {
+                animation: pulse 2s infinite;
+            }
+            @keyframes pulse {
+                0% {
+                    box-shadow: 0 0 0 0 rgba(28, 181, 62, 0.4);
+                }
+                70% {
+                    box-shadow: 0 0 0 10px rgba(79, 70, 229, 0);
+                }
+                100% {
+                    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+                }
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 to-purple-50 min-h-screen flex flex-col items-center justify-center p-4 font-sans">
+<div class="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
+    <!-- 标题区域 -->
+    <div class="bg-primary text-white p-6 text-center">
+        <h1 class="text-2xl md:text-3xl font-bold mb-2 flex items-center justify-center">
+            <i class="fa fa-magic mr-2"></i>随机名称生成器
+        </h1>
+        <p class="opacity-90">生成格式：形容词 + [固定词] + 名词</p>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <div class="p-6">
+
+
+        <!-- 固定词设置 -->
+        <div class="mb-6">
+            <label for="fixed-word" class="block text-gray-700 font-medium mb-2">固定词：</label>
+            <input
+                    type="text"
+                    id="fixed-word"
+                    value="的"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+            >
+            <p class="text-sm text-gray-500 mt-1">例如："的" 会生成 "XX的XX" 格式</p>
+        </div>
+
+        <!-- 生成结果 -->
+        <div class="mb-8 card-animation bg-gray-50 rounded-xl p-6 text-center">
+            <p id="result" class="text-2xl md:text-3xl font-bold text-gray-800 min-h-[60px] flex items-center justify-center">
+                点击生成按钮
+            </p>
+            <p id="example" class="text-gray-500 mt-2 text-sm">例如：可爱的以撒</p>
+        </div>
+
+        <!-- 按钮区域 -->
+        <div class="flex flex-col sm:flex-row gap-4">
+            <button id="generate-btn" class="flex-1 bg-primary hover:bg-primary/90 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 btn-pulse">
+                <i class="fa fa-refresh"></i>
+                <span>生成名称</span>
+            </button>
+            <button id="copy-btn" class="flex-1 bg-secondary hover:bg-secondary/90 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center gap-2">
+                <i class="fa fa-copy"></i>
+                <span>复制结果</span>
+            </button>
+        </div>
+
+        <!-- 生成历史 -->
+        <div class="mt-8">
+            <h2 class="text-lg font-semibold text-gray-700 mb-3 flex items-center">
+                <i class="fa fa-history mr-2 text-gray-500"></i>生成历史
+            </h2>
+            <div id="history-list" class="max-h-40 overflow-y-auto text-gray-600 space-y-2 text-sm">
+                <p class="text-gray-400 italic text-center">暂无历史记录</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 页脚 -->
+<footer class="mt-8 py-4 text-center text-gray-500 text-sm">
+    <p>随机名称生成器 &copy; 2025</p>
+</footer>
+
+<script>
+    // 形容词库
+
+    const adjectives = [
+        "小蓝人","故障","亚伯伦"
+    ];
+
+    // 名词库
+    const nouns = [
+        "大便","机器人","虚空","小蓝人","亚伯伦"
+    ];
+
+    // DOM元素
+    const generateBtn = document.getElementById('generate-btn');
+    const copyBtn = document.getElementById('copy-btn');
+    const resultElement = document.getElementById('result');
+    const fixedWordInput = document.getElementById('fixed-word');
+    const historyList = document.getElementById('history-list');
+    const exampleElement = document.getElementById('example');
+
+    // 生成历史记录数组
+    let history = [];
+
+    // 随机选择数组元素
+    function getRandomItem(array) {
+        const randomIndex = Math.floor(Math.random() * array.length);
+        return array[randomIndex];
+    }
+
+    // 生成随机名称
+    function generateRandomName() {
+        const adjective = getRandomItem(adjectives);
+        const fixedWord = fixedWordInput.value.trim() || '的'; // 默认使用"的"
+        const noun = getRandomItem(nouns);
+
+        // 组合成结果+彩蛋设置
+
+        let egg=Math.floor(Math.random()*100);
+        if(egg===33 ) {
+            result ="诺羽的html摸鱼成果"
+            window.open('https://github.com/nuoyu33nofish', '_blank', 'noopener');
+        }else{
+            result = `${adjective}${fixedWord}${noun}`;
+        }
+        // 更新显示
+        resultElement.textContent = result;
+
+        // 添加动画效果
+        resultElement.classList.add('scale-110', 'text-primary');
+        setTimeout(() => {
+            resultElement.classList.remove('scale-110', 'text-primary');
+        }, 300);
+        //如果是亚伯伦的小蓝人或者小蓝人的亚伯伦
+        if (result=="小蓝人的亚伯伦" || result=="亚伯伦的小蓝人"||result=="小蓝人的虚空"||result=="亚伯伦的大便")
+        {
+            alert("亚蓝99999999999")
+        }
+        if (result=="故障的机器人")
+            {
+                alert("这是我杀戮尖塔第四喜欢的角色")
+            }
+
+        // 添加到历史记录
+        addToHistory(result);
+
+        return result;
+    }
+
+    // 添加到历史记录
+    function addToHistory(item) {
+        history.unshift(item); // 添加到数组开头
+        if (history.length > 100) {
+            history.pop(); // 只保留最近100条记录
+        }
+        updateHistoryDisplay();
+    }
+
+    // 更新历史记录显示
+    function updateHistoryDisplay() {
+        if (history.length === 0) {
+            historyList.innerHTML = '<p class="text-gray-400 italic text-center">暂无历史记录</p>';
+            return;
+        }
+
+        let html = '';
+        history.forEach((item, index) => {
+            html += `<div class="flex items-center justify-between p-2 hover:bg-gray-100 rounded transition-colors">
+                    <span>${item}</span>
+                    <span class="text-xs text-gray-400">${index + 1}</span>
+                </div>`;
+        });
+        historyList.innerHTML = html;
+    }
+
+    // 复制到剪贴板
+    function copyToClipboard() {
+        const text = resultElement.textContent;
+        if (text && text !== '点击生成按钮') {
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    // 显示复制成功提示
+                    const originalText = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '<i class="fa fa-check"></i><span>已复制</span>';
+                    copyBtn.classList.add('bg-green-600');
+
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalText;
+                        copyBtn.classList.remove('bg-green-600');
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('无法复制文本: ', err);
+                    alert('复制失败，请手动复制');
+                });
+        }
+    }
+
+    // 固定词变化时更新示例
+    function updateExample() {
+        const fixedWord = fixedWordInput.value.trim() || '的';
+        exampleElement.textContent = `例如：快乐${fixedWord}机器人`;
+    }
+
+    // 事件监听
+    generateBtn.addEventListener('click', generateRandomName);
+    copyBtn.addEventListener('click', copyToClipboard);
+    fixedWordInput.addEventListener('input', updateExample);
+
+    // 初始生成一个名称
+    window.addEventListener('load', () => {
+        setTimeout(generateRandomName, 500);
+    });
+</script>
+</body>
+</html>
